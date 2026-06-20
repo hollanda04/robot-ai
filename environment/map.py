@@ -1,56 +1,28 @@
-"""
-This module handles the maze generation, start/end point placement, and diamond spawning.
-It generates a grid-based maze where cells can be empty or wall obstacles.
-"""
-
 import random
 from typing import List, Tuple
 from environment.obstacles import Obstacle
 
 class MazeMap:
-    """
-    Generates and maintains a grid-based maze for the simulation.
-    Ensures that the maze is connected, places start/end positions,
-    and spawns random diamonds.
-    """
     
     def __init__(self, cols: int = 19, rows: int = 15, cell_size: int = 40, offset_y: int = 100):
-        """
-        Initializes the maze map.
-        
-        Args:
-            cols (int): Number of columns (should be odd for proper maze borders).
-            rows (int): Number of rows (should be odd for proper maze borders).
-            cell_size (int): Size of each cell in pixels.
-            offset_y (int): Y-offset of the maze grid (leaves room for the HUD).
-        """
-        # Ensure dimensions are odd to allow borders and proper paths
         self.cols = cols if cols % 2 != 0 else cols + 1
         self.rows = rows if rows % 2 != 0 else rows + 1
         self.cell_size = cell_size
         self.offset_y = offset_y
-        
-        # Grid representation: 1 = Wall, 0 = Passage
+
         self.grid = [[1 for _ in range(self.rows)] for _ in range(self.cols)]
-        
-        # Start and End positions (in grid coordinates)
         self.start_grid = (1, 1)
         self.end_grid = (self.cols - 2, self.rows - 2)
         
         self.diamonds = []
         self.obstacles = []
         
-        # Generate the maze layout
         self.generate_maze()
         self.spawn_diamonds()
         self.create_obstacles()
 
     def generate_maze(self):
-        """
-        Generates a maze using a DFS algorithm.
-        Randomly removes some walls to create alternative loops.
-        """
-        # Reset grid to walls
+
         self.grid = [[1 for _ in range(self.rows)] for _ in range(self.cols)]
         
         stack = []
@@ -60,8 +32,7 @@ class MazeMap:
         
         while stack:
             curr_col, curr_row = stack[-1]
-            
-            # Find unvisited neighbors at distance 2
+
             neighbors = []
             directions = [(0, -2), (0, 2), (-2, 0), (2, 0)]
             
@@ -72,9 +43,7 @@ class MazeMap:
                         neighbors.append((nc, nr))
             
             if neighbors:
-                # Pick a random unvisited neighbor
                 next_col, next_row = random.choice(neighbors)
-                # Carve a path through the cell between them
                 mid_col = curr_col + (next_col - curr_col) // 2
                 mid_row = curr_row + (next_row - curr_row) // 2
                 
@@ -85,51 +54,39 @@ class MazeMap:
             else:
                 stack.pop()
                 
-        # Make sure start and end are open
         self.grid[self.start_grid[0]][self.start_grid[1]] = 0
         self.grid[self.end_grid[0]][self.end_grid[1]] = 0
         
-        # Loop factor: open some walls to allow multiple routes (makes navigation/A* more interesting)
-        # We look for wall cells that separate two passages and turn them into passages with some probability
         loop_factor = 0.08
         for col in range(2, self.cols - 2):
             for row in range(2, self.rows - 2):
                 if self.grid[col][row] == 1:
-                    # Check horizontal separation
                     if self.grid[col-1][row] == 0 and self.grid[col+1][row] == 0:
                         if random.random() < loop_factor:
                             self.grid[col][row] = 0
-                    # Check vertical separation
                     elif self.grid[col][row-1] == 0 and self.grid[col][row+1] == 0:
                         if random.random() < loop_factor:
                             self.grid[col][row] = 0
 
     def spawn_diamonds(self):
-        """Spawns 1 to 3 diamonds randomly on empty corridor cells."""
         self.diamonds = []
         num_diamonds = random.randint(1, 3)
-        
-        # Gather all valid passage cells (excluding start and end)
         valid_cells = []
         for col in range(1, self.cols - 1):
             for row in range(1, self.rows - 1):
                 if self.grid[col][row] == 0 and (col, row) != self.start_grid and (col, row) != self.end_grid:
                     valid_cells.append((col, row))
-        
-        # Randomly choose positions for diamonds
         if len(valid_cells) >= num_diamonds:
             self.diamonds = random.sample(valid_cells, num_diamonds)
         else:
             self.diamonds = valid_cells[:num_diamonds]
 
     def create_obstacles(self):
-        """Creates Obstacle instances for all wall cells in the grid."""
         self.obstacles = []
         for col in range(self.cols):
             for row in range(self.rows):
                 if self.grid[col][row] == 1:
                     x, y = self.grid_to_world(col, row)
-                    # Create an obstacle centering around the world coordinate offset
                     self.obstacles.append(
                         Obstacle(
                             x - self.cell_size / 2, 
@@ -140,46 +97,22 @@ class MazeMap:
                     )
 
     def grid_to_world(self, col: int, row: int) -> Tuple[float, float]:
-        """
-        Converts grid coordinates to center world (pixel) coordinates.
-        
-        Args:
-            col (int): Grid column.
-            row (int): Grid row.
-            
-        Returns:
-            Tuple[float, float]: Center coordinates (x, y) in pixels.
-        """
         x = col * self.cell_size + self.cell_size / 2
         y = row * self.cell_size + self.cell_size / 2 + self.offset_y
         return x, y
 
     def world_to_grid(self, x: float, y: float) -> Tuple[int, int]:
-        """
-        Converts world (pixel) coordinates to grid indices.
-        
-        Args:
-            x (float): X-coordinate in pixels.
-            y (float): Y-coordinate in pixels.
-            
-        Returns:
-            Tuple[int, int]: Grid indices (col, row).
-        """
         col = int(x // self.cell_size)
         row = int((y - self.offset_y) // self.cell_size)
-        # Clamp to grid bounds
         col = max(0, min(col, self.cols - 1))
         row = max(0, min(row, self.rows - 1))
         return col, row
 
     def is_valid_cell(self, col: int, row: int) -> bool:
-        """Checks if a cell is within bounds and is a passage (not a wall)."""
         return 0 <= col < self.cols and 0 <= row < self.rows and self.grid[col][row] == 0
         
     def get_width(self) -> int:
-        """Returns map width in pixels."""
         return self.cols * self.cell_size
 
     def get_height(self) -> int:
-        """Returns map height in pixels including HUD offset."""
         return self.rows * self.cell_size + self.offset_y

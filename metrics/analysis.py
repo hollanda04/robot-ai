@@ -1,13 +1,6 @@
-"""
-This module analyzes and compiles the robot's telemetry data,
-including search algorithm performance, control error stats,
-and controller usage durations.
-"""
-
 from typing import List, Dict, Any
 
 class TelemetryAnalyzer:
-    """Computes statistics from the simulation runs and displays them."""
     
     @staticmethod
     def analyze_run(
@@ -15,17 +8,7 @@ class TelemetryAnalyzer:
         bfs_time: float, 
         astar_time: float
     ) -> Dict[str, Any]:
-        """
-        Analyzes the telemetry history log of a robot simulation run.
-        
-        Args:
-            telemetry (List[Dict]): List of state logs recorded during the run.
-            bfs_time (float): Execution time of the BFS algorithm.
-            astar_time (float): Execution time of the A* algorithm.
-            
-        Returns:
-            Dict: Dictionary containing computed metrics and statistics.
-        """
+
         if not telemetry:
             return {
                 'total_time': 0.0,
@@ -41,22 +24,17 @@ class TelemetryAnalyzer:
             
         total_time = telemetry[-1]['time'] - telemetry[0]['time']
         
-        # Speed calculations
         speeds = [log['speed'] for log in telemetry]
         avg_speed = sum(speeds) / len(speeds)
         max_speed = max(speeds)
         
-        # Controller usage time
-        # We estimate usage time based on the dt intervals. 
-        # Alternatively, count log entries if dt is approximately constant.
         pid_count = sum(1 for log in telemetry if log['controller'] == 'PID')
         fuzzy_count = sum(1 for log in telemetry if log['controller'] == 'Fuzzy')
         total_count = len(telemetry)
         
         pid_time = (pid_count / total_count) * total_time
         fuzzy_time = (fuzzy_count / total_count) * total_time
-        
-        # Angle error statistics
+
         angle_errors = [abs(log['angle_error_deg']) for log in telemetry]
         max_angle_error = max(angle_errors)
         mean_absolute_angle_error = sum(angle_errors) / len(angle_errors)
@@ -75,7 +53,6 @@ class TelemetryAnalyzer:
 
     @staticmethod
     def print_summary(stats: Dict[str, Any]):
-        """Prints a clean summary of the simulation metrics to the console."""
         print("\n" + "="*50)
         print("          RELATÓRIO DE DESEMPENHO DA IA          ")
         print("="*50)

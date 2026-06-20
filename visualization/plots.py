@@ -1,20 +1,8 @@
-"""
-This module uses matplotlib to generate telemetry plots when the robot
-completes its run, showing speed profiles, angular errors, and trajectory.
-"""
-
 from typing import List, Dict, Any
 import math
 
 def show_performance_plots(telemetry: List[Dict[str, Any]], stats: Dict[str, Any]):
-    """
-    Generates and displays telemetry performance charts using matplotlib.
-    Uses try/except to handle environments where matplotlib is not installed.
-    
-    Args:
-        telemetry (List[Dict]): Historical state records of the robot run.
-        stats (Dict): Summary statistics dictionary.
-    """
+
     try:
         import matplotlib.pyplot as plt
         import numpy as np
@@ -28,7 +16,6 @@ def show_performance_plots(telemetry: List[Dict[str, Any]], stats: Dict[str, Any
         print("[Aviso] Sem dados de telemetria para plotar.")
         return
 
-    # Extract telemetry arrays
     times = np.array([log['time'] for log in telemetry])
     xs = np.array([log['x'] for log in telemetry])
     ys = np.array([log['y'] for log in telemetry])
@@ -36,24 +23,19 @@ def show_performance_plots(telemetry: List[Dict[str, Any]], stats: Dict[str, Any
     errors = np.array([log['angle_error_deg'] for log in telemetry])
     controllers = np.array([log['controller'] for log in telemetry])
 
-    # Setup figure and grid
     fig = plt.figure(figsize=(12, 8))
     fig.patch.set_facecolor('#1a1b26')
     plt.suptitle("Análise de Telemetria do Explorador 2D", fontsize=16, color='#f3f4f6', weight='bold')
 
-    # Style definitions
     text_color = '#f3f4f6'
     grid_color = '#2e303e'
-    pid_color = '#eab308'    # Yellow
-    fuzzy_color = '#a855f7'  # Purple
+    pid_color = '#eab308'    
+    fuzzy_color = '#a855f7'  
 
-    # --- Plot 1: 2D Trajectory ---
-    ax1 = plt.subplot(2, 2, (1, 3)) # Spans left column
+    ax1 = plt.subplot(2, 2, (1, 3)) 
     ax1.set_facecolor('#11121a')
     ax1.grid(True, color=grid_color, linestyle='--', alpha=0.5)
     
-    # Plot segments with different colors based on controller used
-    # To do this cleanly, we scan for controller changes and plot each segment
     start_idx = 0
     for i in range(1, len(controllers)):
         if controllers[i] != controllers[start_idx] or i == len(controllers) - 1:
@@ -67,7 +49,6 @@ def show_performance_plots(telemetry: List[Dict[str, Any]], stats: Dict[str, Any
             ax1.plot(segment_x, segment_y, color=color, linewidth=2.5, label=label)
             start_idx = i
 
-    # Invert Y-axis because Pygame Y coordinates go downwards
     ax1.invert_yaxis()
     ax1.set_title("Trajetória do Robô no Espaço 2D", color=text_color, fontsize=12, weight='bold')
     ax1.set_xlabel("Coordenada X (pixels)", color=text_color)
@@ -75,12 +56,10 @@ def show_performance_plots(telemetry: List[Dict[str, Any]], stats: Dict[str, Any
     ax1.tick_params(colors=text_color)
     ax1.legend(facecolor='#1e1e24', edgecolor=grid_color, labelcolor=text_color)
 
-    # --- Plot 2: Speed profile over time ---
     ax2 = plt.subplot(2, 2, 2)
     ax2.set_facecolor('#11121a')
     ax2.grid(True, color=grid_color, linestyle='--', alpha=0.5)
     
-    # Plot speed segments
     start_idx = 0
     for i in range(1, len(controllers)):
         if controllers[i] != controllers[start_idx] or i == len(controllers) - 1:
@@ -95,12 +74,10 @@ def show_performance_plots(telemetry: List[Dict[str, Any]], stats: Dict[str, Any
     ax2.set_ylabel("Velocidade (px/s)", color=text_color)
     ax2.tick_params(colors=text_color)
 
-    # --- Plot 3: Heading error over time ---
     ax3 = plt.subplot(2, 2, 4)
     ax3.set_facecolor('#11121a')
     ax3.grid(True, color=grid_color, linestyle='--', alpha=0.5)
     
-    # Plot error segments
     start_idx = 0
     for i in range(1, len(controllers)):
         if controllers[i] != controllers[start_idx] or i == len(controllers) - 1:
@@ -116,9 +93,6 @@ def show_performance_plots(telemetry: List[Dict[str, Any]], stats: Dict[str, Any
     ax3.set_ylabel("Erro Angular (graus)", color=text_color)
     ax3.tick_params(colors=text_color)
 
-    # Adjust layout and show
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     
-    # Make sure window is interactive/non-blocking if called from game loop or let it block at termination
-    # Matplotlib show() blocks by default, which is perfect since the simulation is paused / done!
     plt.show()
