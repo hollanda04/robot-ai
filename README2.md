@@ -1,13 +1,19 @@
-o arquivo labirinto a são os prototipos que andei trabalhando 
+# explicação da minha versão
 
-rascunhos que peguei da internet estudei um pouco e buscando uma maneira de melhorar e implementar na criação e geração do labirinto em si.
+## o arquivo com o nome labirinto a são os prototipos que andei trabalhando 
+
+são rascunhos que peguei da internet estudei um pouco e buscando uma maneira de melhorar e implementar na criação e geração do labirinto em si.
 principas defeitos:
 - mau gerenciamento de arquivos
 - modificações so podem ser feitas diretamente: tamanho do labirinto, tamanho do corredor e velocidade de reprodução do "video"
 - a geração do labirinto se da pela criação de multiplas imagens que juntas criam um video mostrando o seu processo, o que acaba ocupando muita memoria dependendo do pc
 - o mapa e gerado por um formato de arquivo dat, não sei se e ou não um probelma
 
-ja as versões originais do arquivo ou programa eu fui desenvolvendo ao longo do dia, estudando as funções e buscando entender como funciona e com a ajuda do claude eu desenvolvi novas funções e modificações
+---
+
+## edições feitas nos arquivos originais
+
+ja as versões originais do arquivo ou programa que eu fui desenvolvendo ao longo do dia, estudando as funções e buscando entender como funciona e com a ajuda do claude eu desenvolvi novas funções e modificações
 as principais sendo:
 - aumento no numero de diamantes e implementações no processo de busca para quantidade maiores que 6
 - a criação de um botão para as estatisticas de modo que a janela do grafico não seja aberta automaticamente
@@ -26,12 +32,14 @@ implementar as melhorias prioritárias sugeridas: TSP com programação dinâmic
  6. `main.py` — refatorando a state machine para uma classe `Game`Agora reescrevendo como uma classe `Game` com métodos por estado
       * **`main.py`** — reescrito como uma classe `Game`, com métodos separados por responsabilidade (`handle_events`, `update`, `render`, e sub-métodos por estado como `_update_scanning`, `_update_simulation`, `_finish_run`). Isso elimina todos os `nonlocal` e torna o código testável isoladamente
 
-Algumas observações:
-- Mantive a estrutura de pacotes original (`environment/`, `simulation/`, `search/`, `metrics/`, `visualization/`, `control/`) — então coloque `base_controller.py` dentro da pasta `control/`, junto com `pid.py` e `fuzzy.py`.
-- Não toquei em `map.py`, `obstacles.py`, `bfs.py`, `plots.py` — não havia melhorias pendentes neles.
+Algumas observações da ia:
+- Manteve a estrutura de pacotes original (`environment/`, `simulation/`, `search/`, `metrics/`, `visualization/`, `control/`) — então coloque `base_controller.py` dentro da pasta `control/`, junto com `pid.py` e `fuzzy.py`.
+- Não tocou em `map.py`, `obstacles.py`, `bfs.py`, `plots.py` — não havia melhorias pendentes neles.
 - Os arquivos `pid.py`, `fuzzy.py` e `robot.py` precisam estar todos atualizados juntos (são interdependentes pela `BaseController`).
 
-ainda planeja realizar algumas outras melhorias, como:
+---
+
+## ainda planejo realizar algumas outras melhorias, como:
 - integrar a minha versão do gerador de mapa com a do main para gerar um percurso mais completo
 - peritir o usuario controlar o tamanho do mapa e quantidade de diamantes
 - velocidade de demonstração: não mexer na velocidade que o robo completa o labirinto, mas sim a velocidade de reprodução para nos devido a diferença de velocidade na resolução do pid e do fuzzy, pid consegue resolver em 30 segundos enquanto o pid chega a demorar 2 minutos, não sei se e o codigo mas o fuzzy parece demorar mais tempo para se mover
