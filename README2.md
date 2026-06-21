@@ -1,6 +1,6 @@
 # explicação da minha versão
 
-## o arquivo com o nome labirinto a são os prototipos que andei trabalhando 
+## o arquivo com o nome labirinto a são os prototipos que andei trabalhando
 
 são rascunhos que peguei da internet estudei um pouco e buscando uma maneira de melhorar e implementar na criação e geração do labirinto em si.
 principas defeitos:
