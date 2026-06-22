@@ -33,7 +33,13 @@ O projeto utiliza poucas dependências externas. As bibliotecas necessárias sã
 Você pode instalar as dependências necessárias diretamente com o gerenciador de pacotes `pip`:
 
 ```bash
-pip install pygame matplotlib numpy
+pip install -r requirements.txt
+```
+
+Ou usando o `uv` astral-sh/uv
+
+```bash
+uv sync`
 ```
 
 ---
@@ -44,6 +50,12 @@ Para iniciar o simulador, execute o arquivo `main.py` na raiz do diretório do p
 
 ```bash
 python main.py
+```
+
+ou
+
+```bash
+uv run main.py
 ```
 
 ### Passo a Passo de Uso:
