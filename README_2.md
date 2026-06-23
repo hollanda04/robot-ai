@@ -1,22 +1,12 @@
 # explicação da minha versão
 
-## o arquivo com o nome labirinto a são os prototipos que andei trabalhando
-
-são rascunhos que peguei da internet estudei um pouco e buscando uma maneira de melhorar e implementar na criação e geração do labirinto em si.
-principas defeitos:
-- mau gerenciamento de arquivos
-- modificações so podem ser feitas diretamente: tamanho do labirinto, tamanho do corredor e velocidade de reprodução do "video"
-- a geração do labirinto se da pela criação de multiplas imagens que juntas criam um video mostrando o seu processo, o que acaba ocupando muita memoria dependendo do pc
-- o mapa e gerado por um formato de arquivo dat, não sei se e ou não um probelma
-
----
-
 ## edições feitas nos arquivos originais
 
 ja as versões originais do arquivo ou programa que eu fui desenvolvendo ao longo do dia, estudando as funções e buscando entender como funciona e com a ajuda do claude eu desenvolvi novas funções e modificações
 as principais sendo:
 - aumento no numero de diamantes e implementações no processo de busca para quantidade maiores que 6
 - a criação de um botão para as estatisticas de modo que a janela do grafico não seja aberta automaticamente
+- correção da lentidao do fuzzy
 - outras implementações do claude: 
 implementar as melhorias prioritárias sugeridas: TSP com programação dinâmica (Held-Karp), remoção de código morto, correção do pseudo-random das partículas, refatoração do `main.py` em uma classe `Game`, e uma classe base para os controladores:
  1.  `astar.py` — TSP por DP (Held-Karp) em vez de força bruta por permutações
@@ -39,10 +29,4 @@ Algumas observações da ia:
 
 ---
 
-## ainda planejo realizar algumas outras melhorias, como:
-- integrar a minha versão do gerador de mapa com a do main para gerar um percurso mais completo
-- peritir o usuario controlar o tamanho do mapa e quantidade de diamantes
-- velocidade de demonstração: não mexer na velocidade que o robo completa o labirinto, mas sim a velocidade de reprodução para nos devido a diferença de velocidade na resolução do pid e do fuzzy, pid consegue resolver em 30 segundos enquanto o pid chega a demorar 2 minutos, não sei se e o codigo mas o fuzzy parece demorar mais tempo para se mover
-- criar um atalho: quero ver se consigo criar um atalho para não ter que rodar o programa pelo main, acho que sera uma boa forma de impressionar o professor
-
-outra coisa que tambem planejo fazer e editar as anotações deixadas pelas ia, para parecer menos como explicações geradas sobre o funcionamento das partes, para parecer mais como indicadores e observações sobre o codigo para facilitar a edição e apresentação. basicamente vou traduzir os comentarios e fazer com que eles pareçam intencional para a hora da apresentação ou edição do codigo
+## ja cuidei das observações da minha versão, não se esqueça da documentação e do relatorio
