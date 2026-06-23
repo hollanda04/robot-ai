@@ -1,7 +1,4 @@
-"""
-This module implements the Breadth-First Search (BFS) algorithm.
-The agent uses BFS to scan the map, locate diamonds, and log visited cells.
-"""
+#modulo responsavel pela implementaçao do algoritmo BFS. o agente usa o bfs para escanear o mapa, localizar diamantes e registrar as areas visitadas
 
 import time
 from collections import deque
@@ -12,21 +9,7 @@ def bfs_find_diamonds(
     start: Tuple[int, int], 
     diamond_positions: List[Tuple[int, int]]
 ) -> Dict:
-    """
-    Performs a Breadth-First Search (BFS) starting from the robot's initial grid position
-    to search/discover the coordinates of all diamonds in the maze.
-    
-    Args:
-        grid (List[List[int]]): 2D grid of the map (0 for passage, 1 for wall).
-        start (Tuple[int, int]): Starting coordinates (col, row).
-        diamond_positions (List[Tuple[int, int]]): The actual positions of diamonds on the map.
-        
-    Returns:
-        Dict: A dictionary containing:
-            - 'found_diamonds': List of discovered diamond coordinates in the order found.
-            - 'visited_cells': List of coordinates (col, row) visited during the search (for animation/metrics).
-            - 'execution_time': Time taken in seconds.
-    """
+    # performa o BFS começando pela posiçao inicial do robo para procura/descobrir as coordenadas de todos os diamante no labirinto
     start_time = time.perf_counter()
     
     cols = len(grid)
@@ -46,19 +29,19 @@ def bfs_find_diamonds(
         curr = queue.popleft()
         visited_cells_ordered.append(curr)
         
-        # Check if current cell contains a diamond
+        # Checa se a area atual possui um diamante
         if curr in diamonds_set:
             found_diamonds.append(curr)
-            # If we've found all spawned diamonds, we can stop the search early
+            # se todos os diamantes forem encontrados a busca e finalizada mais cedo
             if len(found_diamonds) == len(diamond_positions):
                 break
                 
-        # Explore neighbors
+        # Explora os visinhos
         for dc, dr in directions:
             neighbor = (curr[0] + dc, curr[1] + dr)
             nc, nr = neighbor
             
-            # Check boundaries and if neighbor is walkable (0) and not yet visited
+            # Checa os limites e obseva se os vizinhos possuem passagem(0) ou se ja foram visitados
             if 0 <= nc < cols and 0 <= nr < rows:
                 if grid[nc][nr] == 0 and neighbor not in visited:
                     visited.add(neighbor)
