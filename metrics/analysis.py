@@ -1,13 +1,9 @@
-"""
-This module analyzes and compiles the robot's telemetry data,
-including search algorithm performance, control error stats,
-and controller usage durations.
-"""
+# esse modulo analisa e compila os dados de telemetria do robo, incluindo a performace dos algoritmos de busca, estatisticas de controle de erro e a duraçao de uso do controle
 
 from typing import List, Dict, Any
 
 class TelemetryAnalyzer:
-    """Computes statistics from the simulation runs and displays them."""
+    #computa estatisticas partida da simulação e as mostra
     
     @staticmethod
     def analyze_run(
@@ -15,17 +11,7 @@ class TelemetryAnalyzer:
         bfs_time: float, 
         astar_time: float
     ) -> Dict[str, Any]:
-        """
-        Analyzes the telemetry history log of a robot simulation run.
-        
-        Args:
-            telemetry (List[Dict]): List of state logs recorded during the run.
-            bfs_time (float): Execution time of the BFS algorithm.
-            astar_time (float): Execution time of the A* algorithm.
-            
-        Returns:
-            Dict: Dictionary containing computed metrics and statistics.
-        """
+       # analisa o historico de registros de telemetria da simulação da partida do robo
         if not telemetry:
             return {
                 'total_time': 0.0,
@@ -41,12 +27,12 @@ class TelemetryAnalyzer:
             
         total_time = telemetry[-1]['time'] - telemetry[0]['time']
         
-        # Speed calculations
+        # calculos de velocidade
         speeds = [log['speed'] for log in telemetry]
         avg_speed = sum(speeds) / len(speeds)
         max_speed = max(speeds)
         
-        # Controller usage time
+        # tempo de uso do controle
         # We estimate usage time based on the dt intervals. 
         # Alternatively, count log entries if dt is approximately constant.
         pid_count = sum(1 for log in telemetry if log['controller'] == 'PID')
@@ -56,7 +42,7 @@ class TelemetryAnalyzer:
         pid_time = (pid_count / total_count) * total_time
         fuzzy_time = (fuzzy_count / total_count) * total_time
         
-        # Angle error statistics
+        # estatisticas de erro de angulo
         angle_errors = [abs(log['angle_error_deg']) for log in telemetry]
         max_angle_error = max(angle_errors)
         mean_absolute_angle_error = sum(angle_errors) / len(angle_errors)
@@ -75,12 +61,12 @@ class TelemetryAnalyzer:
 
     @staticmethod
     def _safe_percent(part: float, total: float) -> float:
-        """Returns part/total as a percentage, or 0 if total is zero."""
+        # retorna parte/todas as porcentagems, ou zeero se o total for zero
         return (part / total * 100.0) if total > 0 else 0.0
 
     @staticmethod
     def print_summary(stats: Dict[str, Any]):
-        """Prints a clean summary of the simulation metrics to the console."""
+        # imprime um novo summario das metricas da simulação do console
         pid_pct = TelemetryAnalyzer._safe_percent(stats['pid_time'], stats['total_time'])
         fuzzy_pct = TelemetryAnalyzer._safe_percent(stats['fuzzy_time'], stats['total_time'])
         
