@@ -1,8 +1,4 @@
-"""
-This module defines the Robot class, which maintains the agent's state,
-invokes the active controller (PID or Fuzzy), handles path tracking,
-and logs telemetry metrics.
-"""
+# modulo responsavel por definir a classe robo, responsavel pelo estado do agente, a ativação dos controles pid e fuzzy, responsavel pelo rastreamento de caminho e dos registros telemetricos
 
 import math
 from typing import List, Tuple, Dict
@@ -13,58 +9,48 @@ from simulation.physics import move_with_collision_check
 from environment.map import MazeMap
 
 class Robot:
-    """
-    Represents the explorer robot agent in the simulation.
-    Manages kinematic state, path tracking, collision handling,
-    and telemetry logging.
-    """
+    # representa o agente robor na simulaçao e e responsavel pelas mesmas informações ditas no começo
 
     def __init__(self, x: float, y: float, theta: float = 0.0):
-        """
-        Initializes the Robot.
+        # inicializa o robo
         
-        Args:
-            x (float): Initial x position in pixels.
-            y (float): Initial y position in pixels.
-            theta (float): Initial orientation in radians.
-        """
-        self.start_x = x
-        self.start_y = y
-        self.start_theta = theta
+        self.start_x = x # posiçao inical em pixels
+        self.start_y = y # -
+        self.start_theta = theta # orientação inicial em radianos
         
         self.x = x
         self.y = y
         self.theta = theta
         
-        self.radius = 12.0  # Physical radius for wall collisions
+        self.radius = 12.0  # raio fisico para colisão com a parede
         self.speed = 0.0
         self.omega = 0.0
         
-        # Controllers (any object implementing BaseController can be plugged in here)
+        # Controles
         self.controllers: Dict[str, BaseController] = {
             'PID': PIDController(),
             'Fuzzy': FuzzyController()
         }
-        self.controller_type = 'PID'  # Default controller
+        self.controller_type = 'PID'  # controle padrao
         
-        # Path tracking
-        self.waypoints: List[Tuple[float, float]] = []  # In pixel coordinates
+        # rastreamento de percusso
+        self.waypoints: List[Tuple[float, float]] = []  # cordenadas em pixel
         self.current_waypoint_idx = 0
         
-        # Gameplay states
+        # estado de gameplay
         self.diamonds_collected: List[Tuple[int, int]] = []
         self.finished = False
         
-        # Telemetry log
+        # registro telemetrico
         self.telemetry = []
 
     @property
     def active_controller(self) -> BaseController:
-        """Returns the currently active controller instance."""
+        #retorna o estado de ativação atual do controle
         return self.controllers[self.controller_type]
 
     def reset(self):
-        """Resets the robot to its starting conditions and clears logs."""
+        # reinicia o robo para ascondiçoes iniciais e dos registros
         self.x = self.start_x
         self.y = self.start_y
         self.theta = self.start_theta
@@ -78,41 +64,28 @@ class Robot:
             controller.reset()
 
     def set_path(self, grid_path: List[Tuple[int, int]], map_obj: MazeMap):
-        """
-        Converts grid path to pixel waypoints and sets them for the robot.
+        #corverte o campo/area para pixels marcadores e marca eles para o robo
         
-        Args:
-            grid_path (List[Tuple[int, int]]): Path coordinates in grid index format.
-            map_obj (MazeMap): Map object for coordinate conversions.
-        """
         self.reset()
         self.waypoints = [map_obj.grid_to_world(col, row) for col, row in grid_path]
 
     def switch_controller(self, controller_type: str):
-        """Switches the active controller type and resets its internal state."""
+        #muda de controle e reinicia o seu estado
         if controller_type in self.controllers:
             self.controller_type = controller_type
             self.controllers[controller_type].reset()
 
     def update(self, dt: float, map_obj: MazeMap, elapsed_time: float):
-        """
-        Updates the robot's movement, waypoints, diamond collection,
-        and logs telemetry metrics.
-        
-        Args:
-            dt (float): Time step in seconds.
-            map_obj (MazeMap): Map environment object.
-            elapsed_time (float): Current elapsed simulation time in seconds.
-        """
+        #atualiza o movimento, marcadores, coleta de diamantes e registros de telemetria para o robo
         if self.finished or not self.waypoints:
             self.speed = 0.0
             self.omega = 0.0
             return
 
-        # 1. Get current target waypoint
+        # 1. pega os alvos atuais dos marcadores
         target_x, target_y = self.waypoints[self.current_waypoint_idx]
         
-        # 2. Check if we reached the current waypoint
+        # 2. checa se ele chegou ao marcado atual
         dx = target_x - self.x
         dy = target_y - self.y
         dist_to_target = math.sqrt(dx**2 + dy**2)
@@ -132,33 +105,33 @@ class Robot:
                 self.current_waypoint_idx += 1
                 target_x, target_y = self.waypoints[self.current_waypoint_idx]
         
-        # 3. Call active controller to compute velocity inputs (polymorphic dispatch)
+        # 3. chama o controle ativo para computar a velocidade (polymorphic dispatch) 
         self.speed, self.omega = self.active_controller.compute_control(
             self.x, self.y, self.theta, target_x, target_y, dt
         )
 
-        # 4. Apply kinematics update with collision checks
+        # 4. plica a atualizaçao cinetica com a checagem de colisao
         self.x, self.y, self.theta = move_with_collision_check(
             self.x, self.y, self.theta,
             self.speed, self.omega,
             self.radius, map_obj.obstacles, dt
         )
 
-        # 5. Check for diamond collection
-        # Check proximity to any uncollected diamond on the map
+        # 5. Checa se o diamante foi coletado
+        # Checa a proximidade de qualquer diamante nao coletado no mapa
         curr_grid_pos = map_obj.world_to_grid(self.x, self.y)
         for d_pos in list(map_obj.diamonds):
             d_x, d_y = map_obj.grid_to_world(d_pos[0], d_pos[1])
             dist_to_diamond = math.sqrt((d_x - self.x)**2 + (d_y - self.y)**2)
             
-            # If robot is close to a diamond, collect it
+            # se o robo esta perto do diamante ele ira coletalo
             if dist_to_diamond < (self.radius + 15.0):
                 if d_pos not in self.diamonds_collected:
                     self.diamonds_collected.append(d_pos)
-                    map_obj.diamonds.remove(d_pos)  # Remove from map so it disappears
+                    map_obj.diamonds.remove(d_pos)  # o remove do map e disaparece
 
-        # 6. Log telemetry for later analysis
-        # Calculate current heading error for metrics
+        # 6. registra telemetria para analise posterior
+        # Calcula o erro de rumo para as metricas
         t_theta = math.atan2(target_y - self.y, target_x - self.x)
         err_theta = t_theta - self.theta
         err_theta = (err_theta + math.pi) % (2 * math.pi) - math.pi
