@@ -1,7 +1,4 @@
-"""
-This module implements the A* search algorithm and provides functions to sequence
-the traversal from Start -> Diamonds (in optimal order) -> End.
-"""
+# modulo responsavel pelo algoritimo de busca A* e prove a funçao para a sequencia da viagem do inicio para o diamante e o fim buscando o melhor caminho
 
 import time
 import heapq
@@ -12,18 +9,7 @@ def astar_search(
     start: Tuple[int, int], 
     goal: Tuple[int, int]
 ) -> Optional[List[Tuple[int, int]]]:
-    """
-    Performs A* search to find the shortest path from start to goal.
-    
-    Args:
-        grid (List[List[int]]): 2D grid map (0 = walkable, 1 = wall).
-        start (Tuple[int, int]): Start grid coordinates (col, row).
-        goal (Tuple[int, int]): Goal grid coordinates (col, row).
-        
-    Returns:
-        Optional[List[Tuple[int, int]]]: List of coordinates representing the path,
-                                         or None if no path exists.
-    """
+    # performa o A* para procurar o menor caminho do inicio para o objetivo
     cols = len(grid)
     rows = len(grid[0])
     
@@ -32,11 +18,11 @@ def astar_search(
         return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
     # Priority queue: stores (f_score, g_score, current_node, path)
-    # g_score is the cost to reach the node. f_score = g_score + heuristic
+    # g_score e o custo para alcançar o nodo. f_score = g_score + heuristic
     open_set = []
     heapq.heappush(open_set, (heuristic(start, goal), 0, start, [start]))
     
-    # Track the minimum g_score to each node
+    # registra o minimo g_score para alcançar o node
     g_scores = {start: 0}
     
     directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
@@ -47,7 +33,7 @@ def astar_search(
         if curr == goal:
             return path
             
-        # If we found a shorter path to curr already, skip
+        # se ja acho o menor caminho para prosseguir, ignore
         if g > g_scores.get(curr, float('inf')):
             continue
             
@@ -56,7 +42,7 @@ def astar_search(
             nc, nr = neighbor
             
             if 0 <= nc < cols and 0 <= nr < rows and grid[nc][nr] == 0:
-                tentative_g = g + 1  # grid step cost is 1
+                tentative_g = g + 1  # custo por area = 1
                 
                 if tentative_g < g_scores.get(neighbor, float('inf')):
                     g_scores[neighbor] = tentative_g
@@ -71,26 +57,10 @@ def calculate_optimal_route(
     diamonds: List[Tuple[int, int]], 
     end: Tuple[int, int]
 ) -> Dict:
-    """
-    Computes A* paths between Start, Diamonds, and End, and evaluates all 
-    permutations of diamond visitations to find the global minimum distance path.
-    
-    Args:
-        grid (List[List[int]]): 2D grid map.
-        start (Tuple[int, int]): Start grid coordinate.
-        diamonds (List[Tuple[int, int]]): Discovered diamond coordinates.
-        end (Tuple[int, int]): End grid coordinate.
-        
-    Returns:
-        Dict: A dictionary containing:
-            - 'complete_path': Concentrated list of grid coordinates for the optimized route.
-            - 'segments': List of individual path segments (e.g., Start->D1, D1->D2, etc.).
-            - 'execution_time': Total A* and routing planning time in seconds.
-            - 'ordered_targets': List of targets in the optimal visit order.
-    """
+    # computa os percursos A* entre o inicio, diamantes e fim, e avalia todas as permutações das visitas para o diamante para achar a distancia minima global do percusso
     start_time = time.perf_counter()
     
-    # If no diamonds, just find path from start to end
+    # se não achar diamantes, so procura o melhor caminho do inicio ao fim
     if not diamonds:
         path = astar_search(grid, start, end)
         end_time = time.perf_counter()
@@ -101,7 +71,7 @@ def calculate_optimal_route(
             'ordered_targets': [end]
         }
 
-    # Precalculate A* paths between all pairs in {start, d1, d2, d3, end}
+    # pre calcula o percursos A* entre todos os pares em {start, d1, d2, d3, end}
     # Nodes list
     nodes = [start] + list(diamonds) + [end]
     n = len(nodes)
@@ -110,27 +80,18 @@ def calculate_optimal_route(
     # Memoization dictionary for A* paths: key is (from, to)
     path_cache = {}
     
-    # Run A* for necessary pairs
-    # Note: We need Start -> D_i, D_i -> D_j, and D_i -> End
-    # Let's compute all combinations
+    # Roda A* para os pares necessarios
     for i in range(n):
         for j in range(n):
             if i != j:
-                # We can run A* and cache it
                 p = astar_search(grid, nodes[i], nodes[j])
                 path_cache[(nodes[i], nodes[j])] = p
 
-    # Distance lookup helper (in grid steps). Unreachable pairs are float('inf').
+    # distancia de ajuda de vigia (em passo em area). Unreachable pairs are float('inf').
     def seg_len(a, b):
         p = path_cache.get((a, b))
         return (len(p) - 1) if p else float('inf')
 
-    # --- Held-Karp DP for the diamond visiting order (TSP with fixed start/end) ---
-    # dp[mask][i] = (min cost to start at `start`, visit exactly the diamonds in `mask`,
-    #                ending at diamond index i)
-    # This replaces the previous O(n!) itertools.permutations brute force with an
-    # O(2^d * d^2) dynamic programming approach, which scales far better as the
-    # number of diamonds grows.
     dp: Dict[Tuple[int, int], float] = {}
     parent: Dict[Tuple[int, int], Optional[int]] = {}
 
@@ -160,8 +121,7 @@ def calculate_optimal_route(
                     dp[new_state] = new_cost
                     parent[new_state] = i
 
-    # Pick the best final diamond to end the diamond-visiting chain on,
-    # accounting for the final hop to `end`.
+    # escolhe o melhor diamante para finalizar a fila, levando em conta os desvios no percurso para o final
     best_path_len = float('inf')
     best_last = None
     for i in range(num_diamonds):
